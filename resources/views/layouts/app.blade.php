@@ -21,7 +21,7 @@
   @yield('content')
 </main>
 
-<footer>© {{ date('Y') }} 4vintage</footer>
+<footer>4vintage</footer>
 
 </body>
 </html>

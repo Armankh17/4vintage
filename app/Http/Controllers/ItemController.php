@@ -11,7 +11,7 @@ use Illuminate\View\View;
 
 class ItemController extends Controller
 {
-    // Home page: every item, newest first. ?brand=Nike filters by brand.
+  
     public function index(Request $request): View
     {
         $brand = $request->query('brand');
@@ -26,13 +26,13 @@ class ItemController extends Controller
         return view('items.index', compact('items', 'brands', 'brand'));
     }
 
-    // Upload form
+    
     public function create(): View
     {
         return view('items.create');
     }
 
-    // Save the upload
+    
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
@@ -42,8 +42,7 @@ class ItemController extends Controller
             'price' => ['required', 'numeric', 'min:0', 'max:99999'],
         ]);
 
-        // Save the photo straight into public/uploads so it works on mi-linux
-        // without needing `php artisan storage:link`.
+
         $file = $request->file('photo');
         $filename = Str::random(20).'.'.$file->extension();
 
