@@ -29,6 +29,11 @@ class ItemController extends Controller
             ->latest()
             ->get();
 
+        // AJAX request (sent by the live search) gets just the results HTML
+        if ($request->ajax()) {
+            return view('items._results', compact('items', 'brand', 'search'));
+        }
+
         $brands = Item::query()->distinct()->orderBy('brand')->pluck('brand');
 
         return view('items.index', compact('items', 'brands', 'brand', 'search'));
