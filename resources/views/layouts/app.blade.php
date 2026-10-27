@@ -27,7 +27,7 @@
 </main>
 
 <footer>
-  <div class="wrap">4vintage · Vintage clothes, uploaded by real people</div>
+  <div class="wrap">© {{ date('Y') }} 4vintage · Vintage clothes, uploaded by real people</div>
 </footer>
 
 @stack('scripts')

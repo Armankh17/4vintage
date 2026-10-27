@@ -55,18 +55,60 @@ class ItemController extends Controller
             'price' => ['required', 'numeric', 'min:0', 'max:99999'],
         ]);
 
-        // Save the photo straight into public/uploads so it works on mi-linux
-        // without needing `php artisan storage:link`.
+        $data['photo'] = $this->savePhoto($request);
+
+        Item::create($data);
+
+        return redirect()->route('items.index')->with('status', 'Your item is up.');
+    }
+
+    // Edit form
+    public function edit(Item $item): View
+    {
+        return view('items.edit', compact('item'));
+    }
+
+    // Save the changes. A new photo is optional.
+    public function update(Request $request, Item $item): RedirectResponse
+    {
+        $data = $request->validate([
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'name'  => ['required', 'string', 'max:80'],
+            'brand' => ['required', 'string', 'max:60'],
+            'price' => ['required', 'numeric', 'min:0', 'max:99999'],
+        ]);
+
+        if ($request->hasFile('photo')) {
+            File::delete(public_path($item->photo)); // remove the old photo
+            $data['photo'] = $this->savePhoto($request);
+        } else {
+            unset($data['photo']); // keep the current photo
+        }
+
+        $item->update($data);
+
+        return redirect()->route('items.index')->with('status', 'Item updated.');
+    }
+
+    // Delete the item and its photo
+    public function destroy(Item $item): RedirectResponse
+    {
+        File::delete(public_path($item->photo));
+        $item->delete();
+
+        return redirect()->route('items.index')->with('status', 'Item deleted.');
+    }
+
+    // Save the photo straight into public/uploads so it works on mi-linux
+    // without needing `php artisan storage:link`.
+    private function savePhoto(Request $request): string
+    {
         $file = $request->file('photo');
         $filename = Str::random(20).'.'.$file->extension();
 
         File::ensureDirectoryExists(public_path('uploads'));
         $file->move(public_path('uploads'), $filename);
 
-        $data['photo'] = 'uploads/'.$filename;
-
-        Item::create($data);
-
-        return redirect()->route('items.index')->with('status', 'Your item is up.');
+        return 'uploads/'.$filename;
     }
 }

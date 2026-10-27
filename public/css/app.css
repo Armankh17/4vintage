@@ -155,6 +155,23 @@ main { padding: 36px 20px 64px; }
 .item strong { font-weight: 600; }
 .item p { color: var(--grey); font-size: .9rem; }
 
+.actions { display: flex; gap: 14px; margin-top: 6px; font-size: .85rem; }
+.actions form { display: inline; }
+.actions a, .actions button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--grey);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.actions a:hover { color: var(--accent); }
+.actions button:hover { color: #b42318; }
+
+.form-buttons { display: flex; gap: 10px; }
+
 .empty {
   text-align: center;
   padding: 64px 20px;

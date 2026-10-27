@@ -19,6 +19,15 @@
         </div>
         <strong>{{ $item->brand }}</strong>
         <p>{{ $item->name }}</p>
+        <div class="actions">
+          <a href="{{ route('items.edit', $item) }}">Edit</a>
+          <form method="POST" action="{{ route('items.destroy', $item) }}"
+                onsubmit="return confirm('Delete this item? This can\'t be undone.')">
+            @csrf
+            @method('DELETE')
+            <button type="submit">Delete</button>
+          </form>
+        </div>
       </article>
     @endforeach
   </div>
