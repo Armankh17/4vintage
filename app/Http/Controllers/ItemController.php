@@ -11,12 +11,28 @@ use Illuminate\View\View;
 
 class ItemController extends Controller
 {
-    // Home page: every item, newest first.
-    // ?q=jacket searches name and brand, ?brand=Nike filters by brand.
+    // Sort options: value in the URL => [column, direction]
+    private const SORTS = [
+        'newest'     => ['created_at', 'desc'],
+        'name_asc'   => ['name', 'asc'],
+        'name_desc'  => ['name', 'desc'],
+        'brand_asc'  => ['brand', 'asc'],
+        'brand_desc' => ['brand', 'desc'],
+    ];
+
+    // Home page.
+    // ?q=jacket searches name and brand, ?brand=Nike filters by brand,
+    // ?sort=name_asc sorts A-Z (see SORTS above).
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('q', ''));
         $brand = $request->query('brand');
+
+        // Only allow sorts from the list, so nobody can sort by a random column
+        $sort = array_key_exists((string) $request->query('sort'), self::SORTS)
+            ? $request->query('sort')
+            : 'newest';
+        [$column, $direction] = self::SORTS[$sort];
 
         $items = Item::query()
             ->when($search !== '', function ($q) use ($search) {
@@ -26,7 +42,7 @@ class ItemController extends Controller
                 });
             })
             ->when($brand, fn ($q) => $q->where('brand', $brand))
-            ->latest()
+            ->orderBy($column, $direction)
             ->get();
 
         // AJAX request (sent by the live search) gets just the results HTML
@@ -36,7 +52,7 @@ class ItemController extends Controller
 
         $brands = Item::query()->distinct()->orderBy('brand')->pluck('brand');
 
-        return view('items.index', compact('items', 'brands', 'brand', 'search'));
+        return view('items.index', compact('items', 'brands', 'brand', 'search', 'sort'));
     }
 
     // Upload form

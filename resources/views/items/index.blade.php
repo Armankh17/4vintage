@@ -10,18 +10,35 @@
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
     <input type="search" name="q" value="{{ $search }}" placeholder="Search jackets, Nike, denim…" aria-label="Search items" autocomplete="off">
     <input type="hidden" name="brand" value="{{ $brand }}">
+    <input type="hidden" name="sort" value="{{ $sort }}">
     <button class="btn" type="submit">Search</button>
   </form>
 </section>
 
-@if ($brands->isNotEmpty())
-  <nav class="brands" id="brandFilter" aria-label="Filter by brand">
-    <a href="{{ route('items.index', array_filter(['q' => $search])) }}" data-brand="" @class(['on' => !$brand])>All</a>
-    @foreach ($brands as $b)
-      <a href="{{ route('items.index', array_filter(['q' => $search, 'brand' => $b])) }}" data-brand="{{ $b }}" @class(['on' => $brand === $b])>{{ $b }}</a>
+<div class="toolbar">
+  @if ($brands->isNotEmpty())
+    <nav class="brands" id="brandFilter" aria-label="Filter by brand">
+      <a href="{{ route('items.index', array_filter(['q' => $search, 'sort' => $sort !== 'newest' ? $sort : null])) }}" data-brand="" @class(['on' => !$brand])>All</a>
+      @foreach ($brands as $b)
+        <a href="{{ route('items.index', array_filter(['q' => $search, 'brand' => $b, 'sort' => $sort !== 'newest' ? $sort : null])) }}" data-brand="{{ $b }}" @class(['on' => $brand === $b])>{{ $b }}</a>
+      @endforeach
+    </nav>
+  @endif
+
+  <nav class="sort" id="sortOptions" aria-label="Sort items">
+    <span>Sort</span>
+    @foreach ([
+      'newest' => 'Newest',
+      'name_asc' => 'Name A–Z',
+      'name_desc' => 'Name Z–A',
+      'brand_asc' => 'Brand A–Z',
+      'brand_desc' => 'Brand Z–A',
+    ] as $value => $label)
+      <a href="{{ route('items.index', array_filter(['q' => $search, 'brand' => $brand, 'sort' => $value !== 'newest' ? $value : null])) }}"
+         data-sort="{{ $value }}" @class(['on' => $sort === $value])>{{ $label }}</a>
     @endforeach
   </nav>
-@endif
+</div>
 
 <div id="results" aria-live="polite">
   @include('items._results')
@@ -43,7 +60,7 @@
   function buildUrl() {
     const params = new URLSearchParams(new FormData(form));
     for (const [key, value] of [...params]) {
-      if (!value) params.delete(key);
+      if (!value || (key === 'sort' && value === 'newest')) params.delete(key);
     }
     const qs = params.toString();
     return form.action + (qs ? '?' + qs : '');
@@ -78,6 +95,32 @@
   form.q.addEventListener('input', () => {
     clearTimeout(timer);
     timer = setTimeout(load, 300);
+  });
+
+  // Sorting: hover over an option to apply it (click or tap works too).
+  // A short delay means just moving the mouse past it doesn't trigger it.
+  const sortInput = form.querySelector('input[name="sort"]');
+  const sortNav = document.getElementById('sortOptions');
+  let hoverTimer = null;
+
+  function applySort(link) {
+    if (sortInput.value === link.dataset.sort) return; // already sorted this way
+    sortInput.value = link.dataset.sort;
+    sortNav.querySelectorAll('a').forEach(a => a.classList.toggle('on', a === link));
+    load();
+  }
+
+  sortNav.querySelectorAll('a[data-sort]').forEach(link => {
+    link.addEventListener('mouseenter', () => {
+      clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(() => applySort(link), 250);
+    });
+    link.addEventListener('mouseleave', () => clearTimeout(hoverTimer));
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      clearTimeout(hoverTimer);
+      applySort(link);
+    });
   });
 
   form.addEventListener('submit', e => {

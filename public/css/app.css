@@ -102,18 +102,27 @@ main { padding: 36px 20px 64px; }
 }
 .search input[type="search"]:focus { outline: none; }
 
-/* Brand filter */
-.brands { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-.brands a {
-  padding: 6px 14px;
-  background: var(--card);
-  border: 1px solid var(--line);
+/* Brand filter + sort */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px 20px;
+  margin-bottom: 20px;
+}
+.brands { display: flex; flex-wrap: wrap; gap: 8px; }
+.sort { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-left: auto; font-size: .9rem; }
+.sort span { color: var(--grey); margin-right: 4px; }
+.sort a {
+  padding: 6px 12px;
   border-radius: 999px;
   text-decoration: none;
-  font-size: .9rem;
+  color: var(--grey);
+  transition: background .15s, color .15s;
 }
-.brands a:hover { border-color: var(--ink); }
-.brands a.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.sort a:hover { background: var(--accent-soft); color: var(--accent); }
+.sort a.on { background: var(--accent); color: #fff; }
 
 /* Results */
 #results { transition: opacity .2s; }
