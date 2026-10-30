@@ -178,6 +178,9 @@ main { padding: 36px 20px 64px; }
 }
 .actions a:hover { color: var(--accent); }
 .actions button:hover { color: #b42318; }
+.actions .speak { text-decoration: none; }
+.actions .speak:hover, .actions .speak.on { color: var(--accent); }
+.no-speech .speak { display: none; }
 
 .form-buttons { display: flex; gap: 10px; }
 

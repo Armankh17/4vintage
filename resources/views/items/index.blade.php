@@ -81,6 +81,7 @@
         return res.text();
       })
       .then(html => {
+        if ('speechSynthesis' in window) speechSynthesis.cancel();
         results.innerHTML = html;
         results.classList.remove('loading');
         history.replaceState(null, '', url); // keeps the URL shareable
@@ -128,6 +129,46 @@
     clearTimeout(timer);
     load();
   });
+
+  // ---- Hardware API: Speech Synthesis (speakers) ----
+  // Reads an item out loud, e.g. "Nike. Track jacket. £25.00".
+  // Uses event delegation on #results, so it still works after AJAX replaces the cards.
+  if ('speechSynthesis' in window) {
+    let speakingButton = null;
+
+    function resetButton() {
+      if (speakingButton) {
+        speakingButton.textContent = '🔊 Listen';
+        speakingButton.classList.remove('on');
+        speakingButton = null;
+      }
+    }
+
+    results.addEventListener('click', e => {
+      const button = e.target.closest('.speak');
+      if (!button) return;
+
+      // Pressing the same button again stops it
+      const wasSameButton = button === speakingButton;
+      speechSynthesis.cancel();
+      resetButton();
+      if (wasSameButton) return;
+
+      const speech = new SpeechSynthesisUtterance(button.dataset.text);
+      speech.lang = 'en-GB';
+      speech.rate = 1;
+      speech.onend = resetButton;
+      speech.onerror = resetButton;
+
+      speakingButton = button;
+      button.textContent = '⏹ Stop';
+      button.classList.add('on');
+      speechSynthesis.speak(speech);
+    });
+  } else {
+    // Browser can't speak: hide the Listen buttons
+    document.body.classList.add('no-speech');
+  }
 
   if (brandNav) {
     brandNav.addEventListener('click', e => {

@@ -20,6 +20,10 @@
         <strong>{{ $item->brand }}</strong>
         <p>{{ $item->name }}</p>
         <div class="actions">
+          <button type="button" class="speak"
+                  data-text="{{ $item->brand }}. {{ $item->name }}. £{{ number_format($item->price, 2) }}">
+            🔊 Listen
+          </button>
           <a href="{{ route('items.edit', $item) }}">Edit</a>
           <form method="POST" action="{{ route('items.destroy', $item) }}"
                 onsubmit="return confirm('Delete this item? This can\'t be undone.')">
